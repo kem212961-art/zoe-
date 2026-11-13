@@ -117,6 +117,59 @@ body::before{
 .confetti{position:fixed;top:-20px;pointer-events:none;z-index:10;animation:fall 3s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(620deg);opacity:0}}
 
+/* ticket */
+.ticket{
+  margin:20px auto 0;width:100%;max-width:320px;
+  border-radius:20px;overflow:visible;
+  filter:drop-shadow(0 8px 20px #d1218a33);
+  animation:slideUp .5s .2s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.ticket-top{
+  background:linear-gradient(135deg,#f96cc2,#d4187e);
+  padding:18px 20px 14px;text-align:center;border-radius:20px 20px 0 0;
+}
+.ticket-label{font-size:9px;letter-spacing:2px;font-weight:800;color:#ffcce8;text-transform:uppercase}
+.ticket-name{
+  font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;
+  color:#fff;text-shadow:0 2px 4px #8c0d55;margin-top:6px;line-height:1.1;
+}
+.ticket-divider{
+  position:relative;background:#fff0f8;height:28px;
+  display:flex;align-items:center;justify-content:center;
+}
+.ticket-circle{
+  position:absolute;width:28px;height:28px;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 0%,#fff4fb,#f3e5ff 55%,#eaf0ff 100%);
+  border:2px solid #fff;
+}
+.ticket-circle.left{left:-14px}
+.ticket-circle.right{right:-14px}
+.ticket-dots{
+  width:70%;height:2px;
+  background:repeating-linear-gradient(90deg,#eab6d8 0,#eab6d8 6px,transparent 6px,transparent 12px);
+}
+.ticket-bottom{
+  background:#fff0f8;padding:14px 20px 18px;
+  border-radius:0 0 20px 20px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.ticket-row{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:#78248d}
+.ticket-icon{font-size:16px;width:20px;text-align:center}
+
+/* botón volver */
+.back-btn{
+  display:inline-block;margin-top:20px;
+  padding:13px 24px;border-radius:16px;
+  background:#fff;border:2px solid #eab6d8;
+  color:#d4187e;font-weight:800;font-size:14px;
+  text-decoration:none;
+  box-shadow:0 3px 0 #eab6d8;
+  transition:transform .15s,box-shadow .15s;
+}
+.back-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #eab6d8}
+.back-btn:active{transform:translateY(1px);box-shadow:0 1px 0 #eab6d8}
+
 /* estrellas decorativas */
 .star{position:absolute;pointer-events:none;font-size:20px;opacity:.6;animation:twinkle 3s ease-in-out infinite}
 .star:nth-child(1){top:10px;left:14px;animation-delay:0s}
@@ -165,6 +218,26 @@ body::before{
     <span class="success-emoji">🎉</span>
     <h2>¡Confirmado!</h2>
     <p id="success-msg">¡Gracias! Te esperamos con mucha ilusión en la fiesta de Zoe ♡</p>
+
+    <!-- TICKET -->
+    <div class="ticket" id="ticket">
+      <div class="ticket-top">
+        <span class="ticket-label">✦ TU ENTRADA MÁGICA ✦</span>
+        <div class="ticket-name" id="ticket-name">—</div>
+      </div>
+      <div class="ticket-divider">
+        <span class="ticket-circle left"></span>
+        <div class="ticket-dots"></div>
+        <span class="ticket-circle right"></span>
+      </div>
+      <div class="ticket-bottom">
+        <div class="ticket-row"><span class="ticket-icon">🗓️</span><span id="ticket-date">12 de diciembre</span></div>
+        <div class="ticket-row"><span class="ticket-icon">🕓</span><span id="ticket-time">4:00 PM</span></div>
+        <div class="ticket-row"><span class="ticket-icon">📍</span><span id="ticket-place">Mz I Lt 3, Nuevo Amanecer</span></div>
+      </div>
+    </div>
+
+    <a href="index.html" class="back-btn">🎀 Ver la invitación completa</a>
   </div>
 </div>
 
@@ -220,9 +293,14 @@ document.getElementById('rsvp-form').addEventListener('submit', async e => {
         document.body.append(p);setTimeout(()=>p.remove(),4000);
       }
     }
+    // llenar ticket
+    document.getElementById('ticket-name').textContent = name;
+    document.getElementById('ticket-date').textContent  = document.getElementById('ev-date').textContent;
+    document.getElementById('ticket-time').textContent  = document.getElementById('ev-time').textContent;
+    document.getElementById('ticket-place').textContent = document.getElementById('ev-place').textContent;
     document.getElementById('form-section').style.display='none';
     document.getElementById('success-section').style.display='block';
-    document.getElementById('success-msg').textContent=`¡Gracias, ${name}! Te esperamos con mucha ilusión en la fiesta de Zoe ♡`;
+    document.getElementById('success-msg').textContent=`¡Gracias, ${name}! Guarda tu entrada mágica ♡`;
   }catch(err){
     errEl.textContent='Error: '+err.message;
     btn.disabled=false;btn.textContent='♡ Confirmar mi asistencia';
