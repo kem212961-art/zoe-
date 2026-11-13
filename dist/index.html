@@ -25,11 +25,13 @@ document.getElementById("magic").onclick=()=>{if(!matchMedia('(prefers-reduced-m
 (function loadEventData(){
   const SB_URL='https://nrlraihrsgfkrvobkqoa.supabase.co';
   const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHJhaWhyc2dma3J2b2JrcW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTM1NDQsImV4cCI6MjExMDE2OTU0NH0.SjUvcg3U3eLyG5jSiD9BJTHGCv1TPWppsdFv92hkCWE';
-  const DEFAULT_TARGET = new Date('2026-12-12T16:00:00');
+
+  // Fecha por defecto si no hay datos en Supabase
+  let countdownTarget = new Date('2026-12-12T16:00:00');
 
   function pad(n){return String(n).padStart(2,'0');}
-  function tick(target){
-    const diff=target-new Date();
+  function tick(){
+    const diff=countdownTarget-new Date();
     const days=diff<=0?0:Math.floor(diff/86400000);
     const hours=diff<=0?0:Math.floor((diff%86400000)/3600000);
     const mins=diff<=0?0:Math.floor((diff%3600000)/60000);
@@ -38,8 +40,37 @@ document.getElementById("magic").onclick=()=>{if(!matchMedia('(prefers-reduced-m
       const el=document.getElementById(id);if(el)el.textContent=pad([days,hours,mins,secs][i]);
     });
   }
-  tick(DEFAULT_TARGET);
-  setInterval(()=>tick(DEFAULT_TARGET),1000);
+  tick();
+  setInterval(tick,1000);
+
+  // Parsear fecha como "12 de diciembre" o "12/12/2026" y hora como "4:00 PM"
+  function parseTarget(dateStr, timeStr){
+    if(!dateStr)return null;
+    const meses={'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12};
+    let day,month,year=new Date().getFullYear();
+    // formato "12 de diciembre" o "12 de diciembre 2026"
+    const m=dateStr.toLowerCase().match(/(\d{1,2})\s+de\s+(\w+)(?:\s+(\d{4}))?/);
+    if(m){
+      day=parseInt(m[1]);
+      month=meses[m[2]];
+      if(m[3])year=parseInt(m[3]);
+    } else {
+      // formato "12/12/2026" o "12-12-2026"
+      const p=dateStr.split(/[\/\-]/);
+      if(p.length>=2){day=parseInt(p[0]);month=parseInt(p[1]);if(p[2])year=parseInt(p[2]);}
+    }
+    if(!day||!month)return null;
+    let hours=16,mins=0;
+    if(timeStr){
+      const tm=timeStr.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+      if(tm){
+        hours=parseInt(tm[1]);mins=parseInt(tm[2]);
+        if(tm[3]&&tm[3].toLowerCase()==='pm'&&hours<12)hours+=12;
+        if(tm[3]&&tm[3].toLowerCase()==='am'&&hours===12)hours=0;
+      }
+    }
+    return new Date(year,month-1,day,hours,mins,0);
+  }
 
   fetch(SB_URL+'/rest/v1/event_data?id=eq.1&select=*',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
@@ -49,9 +80,8 @@ document.getElementById("magic").onclick=()=>{if(!matchMedia('(prefers-reduced-m
     if(d.date){const el=document.getElementById('inv-detail-date');if(el)el.textContent=d.date;}
     if(d.time){const el=document.getElementById('inv-detail-time');if(el)el.textContent=d.time;}
     if(d.place){const el=document.getElementById('inv-detail-place');if(el)el.textContent=d.place;}
+    // actualizar target de la cuenta regresiva
+    const t=parseTarget(d.date,d.time);
+    if(t&&!isNaN(t))countdownTarget=t;
   }).catch(()=>{});
-
-  // Iniciar cuenta regresiva
-  tick(DEFAULT_TARGET);
-  setInterval(()=>tick(DEFAULT_TARGET),1000);
 })();</script><script src="entrada.js"></script></body></html>
