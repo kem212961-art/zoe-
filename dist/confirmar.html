@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fce5f1">
+<title>Confirmar asistencia · Fiesta de Zoe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
+:root{--ink:#78248d;--candy:#ef258c;--candy-dark:#b91970;--cream:#fff8fc;--border:#eab6d8;--muted:#a07ab0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Quicksand,sans-serif;background:radial-gradient(ellipse at 50% 0%,#fff4fb,#f3e5ff 55%,#eaf0ff 100%);min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;color:var(--ink)}
+
+.card{background:#ffffffee;border:2px solid #fff;border-radius:28px;box-shadow:0 0 0 1px var(--border),0 8px 32px #c46aaa1a;padding:36px 28px 32px;width:100%;max-width:420px;text-align:center}
+.emoji{font-size:48px;margin-bottom:8px;display:block}
+.card h1{font-family:'Baloo 2',cursive;font-size:24px;color:var(--ink);margin-bottom:6px}
+.card .sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+
+/* datos del evento */
+.event-info{background:linear-gradient(135deg,#fff4fc,#f4eaff);border:2px solid #fff;border-radius:18px;box-shadow:0 0 0 1px var(--border);padding:16px 18px;margin-bottom:24px;text-align:left;display:flex;flex-direction:column;gap:9px}
+.ev-row{display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:700;color:var(--ink)}
+.ev-row .ev-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ev-row span{line-height:1.4}
+
+/* form */
+.form-group{text-align:left;margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.form-group input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:14px;font-size:16px;color:var(--ink);background:#fff9fc;outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:var(--candy)}
+
+.confirm-btn{width:100%;padding:14px;border:none;border-radius:16px;background:linear-gradient(135deg,#f55baa,#d1218a);color:#fff;font-weight:800;font-size:16px;letter-spacing:.4px;box-shadow:0 4px 0 #9e1868,0 6px 18px #d1218a33;transition:transform .15s;margin-top:4px}
+.confirm-btn:hover{transform:translateY(-1px)}
+.confirm-btn:active{transform:translateY(2px)}
+.confirm-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* estados */
+#form-section{display:block}
+#success-section{display:none;text-align:center}
+.success-emoji{font-size:64px;margin-bottom:12px;display:block;animation:pop .4s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+#success-section h2{font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:8px;color:var(--ink)}
+#success-section p{color:var(--muted);font-size:14px;line-height:1.7}
+
+#error-msg{color:#c0145e;font-size:13px;margin-top:8px;min-height:18px}
+
+.confetti{position:fixed;top:-20px;pointer-events:none;z-index:10;animation:fall 3s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(620deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <span class="emoji">🎀</span>
+  <h1>¡Estás invitado a la fiesta de Zoe!</h1>
+  <p class="sub">Confirma tu asistencia para que te esperemos ✦</p>
+
+  <!-- Datos del evento (se llenan dinámicamente) -->
+  <div class="event-info" id="event-info">
+    <div class="ev-row"><span class="ev-icon">🗓️</span><span id="ev-date">Cargando...</span></div>
+    <div class="ev-row"><span class="ev-icon">🕓</span><span id="ev-time">Cargando...</span></div>
+    <div class="ev-row"><span class="ev-icon">📍</span><span id="ev-place">Cargando...</span></div>
+    <div class="ev-row" id="ev-extra-row" style="display:none"><span class="ev-icon">✦</span><span id="ev-extra"></span></div>
+  </div>
+
+  <!-- Formulario -->
+  <div id="form-section">
+    <form id="rsvp-form" novalidate>
+      <div class="form-group">
+        <label for="guest-name">Tu nombre completo</label>
+        <input type="text" id="guest-name" placeholder="Escribe tu nombre aquí" autocomplete="name" required maxlength="60">
+      </div>
+      <button type="submit" class="confirm-btn" id="confirm-btn">♡ Confirmar mi asistencia</button>
+      <p id="error-msg" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <!-- Éxito -->
+  <div id="success-section" aria-live="polite">
+    <span class="success-emoji">🎉</span>
+    <h2>¡Confirmado!</h2>
+    <p id="success-msg">¡Gracias! Te esperamos con mucha ilusión en la fiesta de Zoe ♡</p>
+  </div>
+</div>
+
+<script>
+const KEY_EVENT = 'zoe_event_data';
+const KEY_RSVP  = 'zoe_rsvp_list';
+
+// ── cargar datos del evento ──
+function loadEvent(){
+  try{
+    const data = JSON.parse(localStorage.getItem(KEY_EVENT)) || {};
+    document.getElementById('ev-date').textContent  = data.date  || '12 de diciembre';
+    document.getElementById('ev-time').textContent  = data.time  || '4:00 PM';
+    document.getElementById('ev-place').textContent = data.place || 'Mz I Lt 3, Nuevo Amanecer';
+    if(data.extra){
+      document.getElementById('ev-extra').textContent = data.extra;
+      document.getElementById('ev-extra-row').style.display = 'flex';
+    }
+  }catch{}
+}
+loadEvent();
+
+// escuchar cambios del admin en tiempo real
+window.addEventListener('storage', e => {
+  if(e.key === KEY_EVENT) loadEvent();
+});
+
+// ── confirmar asistencia ──
+document.getElementById('rsvp-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const nameInput = document.getElementById('guest-name');
+  const name = nameInput.value.trim();
+  const errEl = document.getElementById('error-msg');
+
+  if(!name){
+    errEl.textContent = '✦ Por favor escribe tu nombre';
+    nameInput.focus();
+    return;
+  }
+  errEl.textContent = '';
+
+  // guardar
+  let list = [];
+  try{ list = JSON.parse(localStorage.getItem(KEY_RSVP)) || []; }catch{}
+
+  // evitar duplicados
+  const dup = list.some(r => r.name.toLowerCase() === name.toLowerCase());
+  if(dup){
+    errEl.textContent = '✦ Ya confirmaste con ese nombre ♡';
+    return;
+  }
+
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+
+  list.push({ name, date: new Date().toLocaleString('es-PE',{dateStyle:'short',timeStyle:'short'}) });
+  localStorage.setItem(KEY_RSVP, JSON.stringify(list));
+
+  // confeti
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    for(let i=0;i<70;i++){
+      const p = document.createElement('span');
+      p.className = 'confetti';
+      p.textContent = ['✦','♥','●','★'][i%4];
+      p.style.cssText = `left:${Math.random()*100}%;color:${['#d6a1e7','#ec87b8','#9cd6ec','#e7c56f'][i%4]};font-size:${12+Math.random()*18}px;animation-delay:${Math.random()*.5}s`;
+      document.body.append(p);
+      setTimeout(()=>p.remove(),4000);
+    }
+  }
+
+  // mostrar éxito
+  document.getElementById('form-section').style.display = 'none';
+  const suc = document.getElementById('success-section');
+  suc.style.display = 'block';
+  document.getElementById('success-msg').textContent =
+    `¡Gracias, ${name}! Te esperamos con mucha ilusión en la fiesta de Zoe ♡`;
+});
+</script>
+</body>
+</html>
