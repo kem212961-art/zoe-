@@ -1,0 +1,2 @@
+Edición con la herramienta integrada ImageGen.
+Prompt: Use case: background-extraction. Edit target: supplied pony birthday sticker with the word Zoe. Remove ONLY the bright chroma green exterior background, replacing it with actual transparent alpha. Preserve the entire original sticker, all six pony characters, white contour, castle, rainbow and the exact lettering 'Zoe', colors and composition unchanged. Keep entire sticker in frame with a small transparent margin. No green fringe. This will be centered as a web invitation header asset. Return transparent PNG.
