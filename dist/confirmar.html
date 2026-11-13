@@ -197,6 +197,14 @@ document.getElementById('rsvp-form').addEventListener('submit',async e=>{
     document.getElementById('ticket-date').textContent=document.getElementById('ev-date').textContent;
     document.getElementById('ticket-time').textContent=document.getElementById('ev-time').textContent;
     document.getElementById('ticket-place').textContent=document.getElementById('ev-place').textContent;
+    // ocultar todo excepto la sección de éxito
+    document.querySelector('.card-top-deco').style.display='none';
+    document.querySelector('.hero-emoji').style.display='none';
+    document.querySelector('.card h1').style.display='none';
+    document.querySelector('.card .sub').style.display='none';
+    document.querySelector('.event-info').style.display='none';
+    document.querySelector('.divider').style.display='none';
+    document.querySelector('.star:nth-child(1)').style.display='none';
     document.getElementById('form-section').style.display='none';
     document.getElementById('success-section').style.display='block';
   }catch(err){errEl.textContent='Error: '+err.message;btn.disabled=false;btn.textContent='♡ Confirmar mi asistencia';}
