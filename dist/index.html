@@ -21,45 +21,35 @@ body{background:#fff7fc url('fondo-castillo.png') center/cover fixed}body:before
 </section><section class="details" id="detalles"><span class="tiny">UN CUMPLEAÑOS EN EQUESTRIA</span><h2>¡La aventura es mejor contigo!</h2><p>Prepara tu mejor sonrisa para una fiesta llena de alegría.<br>Juntos haremos que los 5 añitos de Zoe sean inolvidables.</p><div class="grid"><div class="item"><span class="icon">🗓️</span><h3>El gran día</h3><p id="inv-detail-date">12 de diciembre</p></div><div class="item"><span class="icon">🕓</span><h3>La hora mágica</h3><p id="inv-detail-time">4:00 PM</p></div><div class="item"><span class="icon">🏰</span><h3>Lugar</h3><p id="inv-detail-place">Mz I Lt 3, Nuevo Amanecer</p></div></div><div class="closing"><span class="tiny">TÚ ERES PARTE DE LA MAGIA</span><h2>¡Te espero con mucha ilusión!</h2><p>Confirma tu asistencia para que te esperemos con todo el corazón ♡</p><div class="rsvp-row"><a class="whatsapp" href="confirmar.html" id="rsvp">♡ Confirmar asistencia</a></div><div class="gift-line">¡Tu amistad es mi mejor regalo! ♡</div><p class="note" id="feedback" aria-live="polite"></p></div></section></main><footer>Hecho con magia, arcoíris y mucha ilusión ♡<br>Invitación de cumpleaños inspirada en My Little Pony.</footer></div><noscript><style>#loading-screen,#envelope-screen{display:none!important}#invitation-card[hidden]{display:block!important}body.in-entry{overflow:auto}</style></noscript><script>
 document.getElementById("magic").onclick=()=>{if(!matchMedia('(prefers-reduced-motion: reduce)').matches){for(let i=0;i<65;i++){const p=document.createElement('span');p.className='confetti';p.textContent=['✦','♥','●'][i%3];p.style.cssText=`left:${Math.random()*100}%;color:${['#d6a1e7','#ec87b8','#9cd6ec','#e7c56f'][i%4]};font-size:${12+Math.random()*17}px;animation-delay:${Math.random()*.6}s`;document.body.append(p);setTimeout(()=>p.remove(),4000)}}if(!matchMedia('(max-width:600px)').matches)document.getElementById('detalles').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})};
 
-// Cargar datos del evento desde el panel admin
+// Cargar datos del evento desde Supabase
 (function loadEventData(){
-  const KEY='zoe_event_data';
-  // Fecha fija del evento: 12 diciembre 2025 16:00
-  // Si el admin actualiza la fecha se puede parsear, pero usamos target fijo por ahora
+  const SB_URL='https://nrlraihrsqfkrvoqbkqoa.supabase.co';
+  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybHJhaWhyc2dma3J2b2JrcW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTM1NDQsImV4cCI6MjExMDE2OTU0NH0.SjUvcg3U3eLyG5jSiD9BJTHGCv1TPWppsdFv92hkCWE';
   const DEFAULT_TARGET = new Date('2026-12-12T16:00:00');
 
   function pad(n){return String(n).padStart(2,'0');}
   function tick(target){
-    const now=new Date();
-    const diff=target-now;
+    const diff=target-new Date();
     const days=diff<=0?0:Math.floor(diff/86400000);
     const hours=diff<=0?0:Math.floor((diff%86400000)/3600000);
     const mins=diff<=0?0:Math.floor((diff%3600000)/60000);
     const secs=diff<=0?0:Math.floor((diff%60000)/1000);
-    const vals=[pad(days),pad(hours),pad(mins),pad(secs)];
     ['cd-days','cd-hours','cd-mins','cd-secs'].forEach((id,i)=>{
-      const el=document.getElementById(id); if(el)el.textContent=vals[i];
-    });
-    ['cd-days2','cd-hours2','cd-mins2','cd-secs2'].forEach((id,i)=>{
-      const el=document.getElementById(id); if(el)el.textContent=vals[i];
+      const el=document.getElementById(id);if(el)el.textContent=pad([days,hours,mins,secs][i]);
     });
   }
+  tick(DEFAULT_TARGET);
+  setInterval(()=>tick(DEFAULT_TARGET),1000);
 
-  function apply(){
-    try{
-      const d=JSON.parse(localStorage.getItem(KEY))||{};
-      if(d.date){
-        const el=document.getElementById('inv-date');
-        const el2=document.getElementById('inv-detail-date');
-        if(el)el.textContent=d.date+(d.time?' · '+d.time:'');
-        if(el2)el2.textContent=d.date;
-      }
-      if(d.time){const el=document.getElementById('inv-detail-time');if(el)el.textContent=d.time;}
-      if(d.place){const el=document.getElementById('inv-detail-place');if(el)el.textContent=d.place;}
-    }catch{}
-  }
-  apply();
-  window.addEventListener('storage',e=>{if(e.key===KEY)apply();});
+  fetch(SB_URL+'/rest/v1/event_data?id=eq.1&select=*',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(r=>r.json()).then(rows=>{
+    if(!rows||!rows[0])return;
+    const d=rows[0];
+    if(d.date){const el=document.getElementById('inv-detail-date');if(el)el.textContent=d.date;}
+    if(d.time){const el=document.getElementById('inv-detail-time');if(el)el.textContent=d.time;}
+    if(d.place){const el=document.getElementById('inv-detail-place');if(el)el.textContent=d.place;}
+  }).catch(()=>{});
 
   // Iniciar cuenta regresiva
   tick(DEFAULT_TARGET);
