@@ -15,7 +15,7 @@ header{color:#85328d}.brand{background:#fff9fccc;border:1px solid #fff;padding:4
 .adventure{color:#9a238c;text-shadow:0 1px 0 #fff,0 0 8px #fff;font-weight:700}
 .hero .age{font-family:'Baloo 2',cursive;color:#b82a90;font-weight:800;text-shadow:0 2px 0 white,1px 0 0 white,-1px 0 0 white;margin-top:6px}
 .five{color:#f42b92;text-shadow:2px 2px 0 white,-1px -1px 0 white,0 4px 0 #b83a8e;font-size:1.7em}
-.party-countdown{border:2px solid #fff;background:linear-gradient(150deg,#fffdfef2,#ffe6f5ed);box-shadow:0 0 0 1px #edb1d6,0 4px 0 #dbabd14d;border-radius:17px;color:#a0348c}
+.party-countdown{border:none;background:transparent;box-shadow:none;border-radius:0;color:#a0348c}
 .party-countdown span{color:#bf4599;font-weight:800}.party-countdown strong{color:#83328a;font-weight:700}
 .hero .intro{color:#762d82;font-weight:600;text-shadow:0 1px 0 #fff,0 0 8px #fff,0 0 15px #fff}
 .details .grid{background:linear-gradient(130deg,#fffcfef5,#ffedf8f5);border:2px solid white;box-shadow:0 0 0 1px #e8acd4,0 4px 0 #cf8eb839,0 8px 18px #9c3e8214;border-radius:21px}
