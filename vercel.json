@@ -1,6 +1,8 @@
 {
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/confirmar", "destination": "/confirmar.html" },
+    { "source": "/", "destination": "/index.html" }
   ]
 }
